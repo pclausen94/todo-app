@@ -149,10 +149,13 @@ class Notes extends React.Component {
             />
             <Typography
               variant="body1"
-              style={{
+              sx={{
                 marginRight: "8px",
                 marginLeft: "8px",
                 textDecoration: note.status ? "line-through" : "none",
+                overflowWrap: "break-word",
+                wordWrap: "break-word",
+                maxWidth: ["30%", "100px"], // Responsive max-width
               }}
             >
               {note.description}
