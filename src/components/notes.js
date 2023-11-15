@@ -1,6 +1,12 @@
 import { Component } from "react";
 import { app } from "../firebase";
-import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore/lite";
 import {
   Box,
   Checkbox,
@@ -41,6 +47,20 @@ class Notes extends Component {
     this.refreshNotes();
   }
 
+  toggleStatus = async (note) => {
+    const db = getFirestore(app);
+    const notesRef = doc(db, "notes/" + note.id);
+
+    await updateDoc(notesRef, { status: !note.status });
+
+    this.setState((prevState) => {
+      const updatedNotes = prevState.notes.map((n) =>
+        n.id === note.id ? { ...n, status: !n.status } : n
+      );
+      return { notes: updatedNotes };
+    });
+  };
+
   render() {
     const { notes } = this.state;
     return (
@@ -72,11 +92,20 @@ class Notes extends Component {
           />
         </form>
         {notes.map((note) => (
-          <Box display="flex" alignItems="center">
-            <Checkbox color="default" />
+          <Box key={note.id} display="flex" alignItems="center">
+            <Checkbox
+              color="default"
+              checked={note.status}
+              onChange={() => this.toggleStatus(note)}
+              id={`status_${note.id}`}
+            />
             <Typography
               variant="body1"
-              style={{ marginRight: "8px", marginLeft: "8px" }}
+              style={{
+                marginRight: "8px",
+                marginLeft: "8px",
+                textDecoration: note.status ? "line-through" : "none",
+              }}
             >
               {note.description}
             </Typography>
