@@ -7,6 +7,7 @@ import {
   doc,
   updateDoc,
   addDoc,
+  deleteDoc,
 } from "firebase/firestore/lite";
 import {
   Box,
@@ -81,6 +82,14 @@ class Notes extends React.Component {
     });
   };
 
+  async deleteNote(id) {
+    const db = getFirestore(app);
+    const notesRef = doc(db, "notes/" + id);
+
+    await deleteDoc(notesRef);
+    this.refreshNotes();
+  }
+
   toggleStatus = async (note) => {
     const db = getFirestore(app);
     const notesRef = doc(db, "notes/" + note.id);
@@ -149,7 +158,7 @@ class Notes extends React.Component {
               {note.description}
             </Typography>
             <Box flex="1" />
-            <IconButton aria-label="delete">
+            <IconButton onClick={() => this.deleteNote(note.id)}>
               <ClearIcon />
             </IconButton>
           </Box>
