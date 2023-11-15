@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React from "react";
 import { app } from "../firebase";
 import {
   getFirestore,
@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   updateDoc,
+  addDoc,
 } from "firebase/firestore/lite";
 import {
   Box,
@@ -20,11 +21,12 @@ import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 
-class Notes extends Component {
+class Notes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       notes: [],
+      newNote: "",
     };
   }
 
@@ -47,6 +49,38 @@ class Notes extends Component {
     this.refreshNotes();
   }
 
+  async addNote() {
+    const { newNote } = this.state;
+
+    if (newNote.trim() !== "") {
+      const newNotesObject = {
+        description: newNote,
+        status: false,
+      };
+
+      const db = getFirestore(app);
+      const notesCol = collection(db, "notes");
+
+      await addDoc(notesCol, newNotesObject);
+      this.refreshNotes();
+
+      this.setState({
+        newNote: "",
+      });
+    } else {
+      this.setState({
+        error: "This field can't be empty. Please try again.",
+      });
+    }
+  }
+
+  handleInputChange = (event) => {
+    this.setState({
+      newNote: event.target.value,
+      error: "",
+    });
+  };
+
   toggleStatus = async (note) => {
     const db = getFirestore(app);
     const notesRef = doc(db, "notes/" + note.id);
@@ -62,7 +96,8 @@ class Notes extends Component {
   };
 
   render() {
-    const { notes } = this.state;
+    const { notes, newNote, error } = this.state;
+
     return (
       <Box>
         <Typography variant="h2">
@@ -73,17 +108,16 @@ class Notes extends Component {
         </Typography>
         <form style={{ display: "flex", alignItems: "stretch" }}>
           <TextField
+            id="newNote"
             label="Add your task"
             variant="outlined"
             fullWidth
+            value={newNote}
+            onChange={this.handleInputChange}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => {
-                      /* Add your click handler here */
-                    }}
-                  >
+                  <IconButton onClick={() => this.addNote()}>
                     <AddIcon />
                   </IconButton>
                 </InputAdornment>
@@ -91,6 +125,11 @@ class Notes extends Component {
             }}
           />
         </form>
+        {error && (
+          <Typography color="error" variant="body2">
+            {error}
+          </Typography>
+        )}
         {notes.map((note) => (
           <Box key={note.id} display="flex" alignItems="center">
             <Checkbox
