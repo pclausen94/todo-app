@@ -8,9 +8,11 @@ import {
   updateDoc,
   addDoc,
   deleteDoc,
+  writeBatch,
 } from "firebase/firestore/lite";
 import {
   Box,
+  Button,
   Checkbox,
   IconButton,
   InputAdornment,
@@ -28,6 +30,8 @@ class Notes extends React.Component {
     this.state = {
       notes: [],
       newNote: "",
+      totalTasksCounter: null,
+      completedTasksCounter: null,
     };
   }
 
@@ -43,11 +47,19 @@ class Notes extends React.Component {
       notesList.push(note);
     });
 
-    this.setState({ notes: notesList });
+    this.setState({ notes: notesList, totalTasksCounter: notesList.length });
   }
 
-  componentDidMount() {
-    this.refreshNotes();
+  async componentDidMount() {
+    await this.refreshNotes();
+
+    const initialCompletedTasksCounter = this.state.notes.filter(
+      (note) => note.status
+    ).length;
+
+    this.setState({
+      completedTasksCounter: initialCompletedTasksCounter,
+    });
   }
 
   async addNote() {
@@ -65,9 +77,10 @@ class Notes extends React.Component {
       await addDoc(notesCol, newNotesObject);
       this.refreshNotes();
 
-      this.setState({
+      this.setState((prevState) => ({
         newNote: "",
-      });
+        totalTasksCounter: prevState.totalTasksCounter + 1,
+      }));
     } else {
       this.setState({
         error: "This field can't be empty. Please try again.",
@@ -87,8 +100,41 @@ class Notes extends React.Component {
     const notesRef = doc(db, "notes/" + id);
 
     await deleteDoc(notesRef);
-    this.refreshNotes();
+    await this.refreshNotes(); // Wait for refreshNotes to complete
+
+    const { notes } = this.state;
+    const updatedNotes = notes.filter((n) => n.id !== id);
+    const completedTasksCounter = updatedNotes.filter((n) => n.status).length;
+
+    this.setState({
+      totalTasksCounter: updatedNotes.length,
+      completedTasksCounter,
+      notes: updatedNotes,
+    });
   }
+
+  clearAllTasks = async () => {
+    const db = getFirestore(app);
+    const notesCol = collection(db, "notes");
+
+    const snapshot = await getDocs(notesCol);
+
+    const batch = writeBatch(db);
+
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    // The writes are committed when you execute the batch
+    await batch.commit();
+
+    // Refresh notes and update counters
+    await this.refreshNotes();
+    this.setState({
+      completedTasksCounter: 0,
+      totalTasksCounter: 0,
+    });
+  };
 
   toggleStatus = async (note) => {
     const db = getFirestore(app);
@@ -100,12 +146,16 @@ class Notes extends React.Component {
       const updatedNotes = prevState.notes.map((n) =>
         n.id === note.id ? { ...n, status: !n.status } : n
       );
-      return { notes: updatedNotes };
+
+      const completedTasksCounter = updatedNotes.filter((n) => n.status).length;
+
+      return { notes: updatedNotes, completedTasksCounter };
     });
   };
 
   render() {
-    const { notes, newNote, error } = this.state;
+    const { notes, newNote, error, totalTasksCounter, completedTasksCounter } =
+      this.state;
 
     return (
       <Box>
@@ -166,6 +216,27 @@ class Notes extends React.Component {
             </IconButton>
           </Box>
         ))}
+        <Box
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: "2%",
+          }}
+        >
+          <Typography variant="h6">
+            You have completed {completedTasksCounter} out of{" "}
+            {totalTasksCounter} pending tasks
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            style={{ marginLeft: "10px" }}
+            onClick={this.clearAllTasks}
+          >
+            Clear All
+          </Button>
+        </Box>
       </Box>
     );
   }
