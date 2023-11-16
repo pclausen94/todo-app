@@ -225,10 +225,12 @@ class Notes extends React.Component {
                   fontFamily: "'Roboto', sans-serif", // Change the font family
                   fontSize: "1rem", // Adjust the font size
                   color: note.status ? "#757575" : "inherit", // Adjust the text color
+                  wordBreak: "break-word", // Allow long words to break and wrap onto the next line
                 }}
               >
                 {note.description}
               </Typography>
+
               <Box flex="1" />
               <IconButton onClick={() => this.deleteNote(note.id)}>
                 <ClearIcon />
