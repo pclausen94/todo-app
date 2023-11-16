@@ -221,7 +221,7 @@ class Notes extends React.Component {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: "2%",
+            marginTop: "4%",
           }}
         >
           <Typography variant="h6">
