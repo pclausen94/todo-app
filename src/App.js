@@ -1,4 +1,3 @@
-import React from "react";
 import Notes from "./components/notes";
 import { Card, Container, CssBaseline } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
