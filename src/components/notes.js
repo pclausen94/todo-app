@@ -13,7 +13,9 @@ import {
 import {
   Box,
   Button,
+  Card,
   Checkbox,
+  Divider,
   IconButton,
   InputAdornment,
   ListItemIcon,
@@ -23,6 +25,8 @@ import {
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
+import PanoramaFishEyeRoundedIcon from "@mui/icons-material/PanoramaFishEyeRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 
 class Notes extends React.Component {
   constructor(props) {
@@ -162,10 +166,10 @@ class Notes extends React.Component {
         <Typography variant="h2">
           Todo List{" "}
           <ListItemIcon>
-            <HistoryEduIcon style={{ fontSize: 50 }} />
+            <HistoryEduIcon style={{ fontSize: "3rem" }} />
           </ListItemIcon>
         </Typography>
-        <form style={{ display: "flex", alignItems: "stretch" }}>
+        <form style={{ display: "flex", flexDirection: "column" }}>
           <TextField
             id="newNote"
             label="Add your task"
@@ -189,36 +193,53 @@ class Notes extends React.Component {
             {error}
           </Typography>
         )}
+        <Divider style={{ margin: "10px 0" }} />
         {notes.map((note) => (
-          <Box key={note.id} display="flex" alignItems="center">
-            <Checkbox
-              color="default"
-              checked={note.status}
-              onChange={() => this.toggleStatus(note)}
-              id={`status_${note.id}`}
-            />
-            <Typography
-              variant="body1"
-              sx={{
-                marginRight: "8px",
-                marginLeft: "8px",
-                textDecoration: note.status ? "line-through" : "none",
-                overflowWrap: "break-word",
-                wordWrap: "break-word",
-                maxWidth: ["30%", "100px"], // Responsive max-width
-              }}
-            >
-              {note.description}
-            </Typography>
-            <Box flex="1" />
-            <IconButton onClick={() => this.deleteNote(note.id)}>
-              <ClearIcon />
-            </IconButton>
-          </Box>
+          <Card
+            key={note.id}
+            variant="outlined"
+            style={{
+              backgroundColor: "#eee", // Grey background color
+              padding: "10px",
+              marginTop: "10px", // Adjust the spacing as needed
+            }}
+          >
+            <Box display="flex" alignItems="center">
+              <Checkbox
+                icon={<PanoramaFishEyeRoundedIcon />}
+                checkedIcon={<CheckCircleOutlineRoundedIcon />}
+                color="success"
+                checked={note.status}
+                onChange={() => this.toggleStatus(note)}
+                id={`status_${note.id}`}
+              />
+              <Typography
+                variant="body1"
+                sx={{
+                  marginLeft: "8px",
+                  marginRight: "8px",
+                  textDecoration: note.status ? "line-through" : "none",
+                  overflowWrap: "break-word",
+                  wordWrap: "break-word",
+                  maxWidth: ["100%", "70%", "50%"], // Responsive max-width
+                  fontFamily: "'Roboto', sans-serif", // Change the font family
+                  fontSize: "1rem", // Adjust the font size
+                  color: note.status ? "#757575" : "inherit", // Adjust the text color
+                }}
+              >
+                {note.description}
+              </Typography>
+              <Box flex="1" />
+              <IconButton onClick={() => this.deleteNote(note.id)}>
+                <ClearIcon />
+              </IconButton>
+            </Box>
+          </Card>
         ))}
         <Box
           style={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
             marginTop: "4%",
@@ -231,7 +252,7 @@ class Notes extends React.Component {
           <Button
             variant="contained"
             color="error"
-            style={{ marginLeft: "10px" }}
+            style={{ marginTop: "10px" }}
             onClick={this.clearAllTasks}
           >
             Clear All

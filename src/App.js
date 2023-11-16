@@ -27,12 +27,13 @@ function App() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
+          padding: "0", // Remove default padding
         }}
       >
         <Card
           sx={{
-            padding: "30px", // Adjust the padding to add space around the text
-            width: "40%", // Adjust the width to make the Card larger
+            padding: "20px",
+            width: ["100%", "80%", "60%", "40%"], // Responsive width
           }}
         >
           <Notes />
